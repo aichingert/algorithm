@@ -5,8 +5,8 @@ pub struct Dijkstra {
 }
 
 impl Dijkstra {
-    fn solve(&self) -> Vec<Node> {
-        
+    pub fn solve(&self) -> Vec<Node> {
+
         vec![]
     }
 }
