@@ -1,4 +1,3 @@
-
 pub struct Node {
     value: i32,
     connections: Vec<Option<Box<Node>>>
