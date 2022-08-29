@@ -1,42 +1,35 @@
 use eframe::egui;
 
+use crate::dijkstra::Dijkstra;
+use crate::node::Node;
+
 pub fn app() {
     let options = eframe::NativeOptions::default();
     
     eframe::run_native(
-        "Dijkstra visualize",
+        "Dijkstra visualizer",
         options,
-        Box::new(|_cc| Box::new(MyApp::default())),
+        Box::new(|_cc| Box::new(Dijkstra::default())),
     );
 }
 
-struct MyApp {
-    name: String,
-    age: u32,
-}
-
-impl Default for MyApp {
-    fn default() -> Self {
-        Self {
-            name: "Arthur".to_owned(),
-            age: 42,
-        }
-    }
-}
-
-impl eframe::App for MyApp {
+impl eframe::App for Dijkstra {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
+            ui.heading("Dijkstra visualizer");
             ui.horizontal(|ui| {
-                ui.label("Your name: ");
-                ui.text_edit_singleline(&mut self.name);
+                ui.label("Node value: ");
+                ui.text_edit_singleline(&mut self.current_node_value);
             });
-            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("age"));
-            if ui.button("Click each year").clicked() {
-                self.age += 1;
+            if ui.button("Add node").clicked() {
+                if !self.current_node_value.parse::<i32>().is_err() {
+                    let node: Node = Node::new(self.current_node_value.parse::<i32>().unwrap(), vec![]);
+                    self.nodes.push(node);
+                    println!("{:?}", self);
+                } else {
+                    ui.label("Please enter a valid value for the node");
+                }
             }
-            ui.label(format!("Hello '{}', age {}", self.name, self.age));
         });
     }
 }
