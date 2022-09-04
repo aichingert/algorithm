@@ -37,6 +37,12 @@ impl eframe::App for Dijkstra {
                     ui.label("Please enter a valid value for the node");
                 }
             }
+
+            if ui.button("Solve").clicked() {
+                let p: Vec<Node> = self.solve();
+            }
         });
+
+
     }
 }
