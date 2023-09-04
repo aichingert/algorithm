@@ -2,37 +2,60 @@ use leptos::*;
 use leptos_router::*;
 
 #[component]
-pub fn Routes(cx: Scope) -> impl IntoView {
+pub fn App(cx: Scope) -> impl IntoView {
+    log::debug!("rendering routes");
+
     view! { cx,
         <Router>
             <nav>
-                <A exact=true href="/">Algorithms</A>
-                <A href="about">About</A>
+                <A href="/"> "Home" </A>
+                <A href="/algorithms"> "Algorithms" </A>
             </nav>
             <main>
-                <AlgorithmRoutes/>
-                <Route
-                    path="about"
-                    view=|cx| view! { cx, <About/> }
-                />
-                <About/>
+                <Routes>
+                    <Route
+                        path="/"
+                        view=Home
+                    />
+                    <Route
+                        path="algorithms"
+                        view=Algorithms
+                    />
+                    <Route
+                        path="algorithms/dijkstra"
+                        view=Dijkstra
+                    />
+                </Routes>
             </main>
         </Router>
     }
 }
 
-#[component(transparent)]
-pub fn AlgorithmRoutes(cx: Scope) -> impl IntoView {
+#[component]
+pub fn Algorithms(cx: Scope) -> impl IntoView {
     view! { cx,
-        <Route
-            path=""
-            view=|cx| view! { cx, <h1> "Hi" </h1> }
-        />
+        <h1> "All algorithms" </h1>
+        <A href="/algorithms/dijkstra"> "Dijkstra" </A>
     }
 }
 
 #[component]
-pub fn About(cx: Scope) -> impl IntoView {
+pub fn Dijkstra(cx: Scope) -> impl IntoView {
+    view! { cx,
+        <h1> "D" </h1>
+        <h1> "i" </h1>
+        <h1> "j" </h1>
+        <h1> "k" </h1>
+        <h1> "s" </h1>
+        <h1> "t" </h1>
+        <h1> "r" </h1>
+        <h1> "a" </h1>
+    }
+}
+
+#[component]
+pub fn Home(cx: Scope) -> impl IntoView {
+    log::debug!("rendering about");
     view! { cx,
         <h1> "Algorithm" </h1>
 
@@ -43,5 +66,6 @@ pub fn About(cx: Scope) -> impl IntoView {
 }
 
 fn main() {
-    mount_to_body(|cx| view! { cx, <Routes/> })
+    _ = console_log::init_with_level(log::Level::Debug);
+    mount_to_body(|cx| view! { cx, <App/> })
 }
