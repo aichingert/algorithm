@@ -1,6 +1,11 @@
 use leptos::*;
 use leptos_router::*;
 
+pub mod components;
+
+pub mod algorithms;
+pub use algorithms::{Algorithms, Dijkstra};
+
 #[component]
 pub fn App(cx: Scope) -> impl IntoView {
     log::debug!("rendering routes");
@@ -28,28 +33,6 @@ pub fn App(cx: Scope) -> impl IntoView {
                 </Routes>
             </main>
         </Router>
-    }
-}
-
-#[component]
-pub fn Algorithms(cx: Scope) -> impl IntoView {
-    view! { cx,
-        <h1> "All algorithms" </h1>
-        <A href="/algorithms/dijkstra"> "Dijkstra" </A>
-    }
-}
-
-#[component]
-pub fn Dijkstra(cx: Scope) -> impl IntoView {
-    view! { cx,
-        <h1> "D" </h1>
-        <h1> "i" </h1>
-        <h1> "j" </h1>
-        <h1> "k" </h1>
-        <h1> "s" </h1>
-        <h1> "t" </h1>
-        <h1> "r" </h1>
-        <h1> "a" </h1>
     }
 }
 
