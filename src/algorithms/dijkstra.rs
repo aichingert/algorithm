@@ -1,19 +1,17 @@
 use leptos::*;
 
 use crate::components::Circle;
+use crate::common::canvas::get_canvas;
 
 #[component]
 pub fn Dijkstra(cx: Scope) -> impl IntoView {
+    let (ctx, set_ctx) = create_signal(cx, get_canvas());
+
     view! { cx,
-        <h1> "D" </h1>
-        <h1> "i" </h1>
-        <h1> "j" </h1>
-        <h1> "k" </h1>
-        <h1> "s" </h1>
-        <h1> "t" </h1>
-        <h1> "r" </h1>
-        <h1> "a" </h1>
-        <Circle radius=30.0 />
+        <button on:click=move |_| set_ctx.update(|ctx| *ctx = get_canvas())>"draw"</button>
+
+        <canvas id="canvas" />
+        <Circle canvas_ctx=ctx radius=30.0 />
     }
 }
 
