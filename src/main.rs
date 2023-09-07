@@ -2,7 +2,6 @@ use leptos::*;
 use leptos_router::*;
 
 pub mod components;
-pub mod common;
 
 pub mod algorithms;
 pub use algorithms::{Algorithms, Dijkstra};
