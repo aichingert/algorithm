@@ -8,23 +8,24 @@
     </head>
     <style>
         nav {
-            border: 1px solid red;
-            color: red;
             display: flex;
             justify-content: space-around;
             align-items: center;
         }
-        
-        /* matches the current <A/> */
-        a[aria-current="page"] {
-            font-weight: bold;
-            background: #e0e0e0;
+
+        .map {
+            display: grid;
+            grid-template-columns: repeat(10, 20px);
+            grid-auto-rows: 20px;
         }
 
-	body {
-		background: #222244;
-		color: white;
-	}
+        .open {
+            background: white;
+        }
+
+        .blocking {
+            background: red;
+        }
     </style>
     <body></body>
 </html>

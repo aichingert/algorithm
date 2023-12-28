@@ -47,5 +47,5 @@ pub fn Home(cx: Scope) -> impl IntoView {
 
 fn main() {
     _ = console_log::init_with_level(log::Level::Debug);
-    mount_to_body(|cx| view! { cx, <App/> })
+    mount_to_body(|cx| view! { cx, <Dijkstra/> })
 }
