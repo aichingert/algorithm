@@ -1,5 +1,6 @@
 use bevy::{
     prelude::*,
+    winit::WinitSettings,
     window::PrimaryWindow,
 };
 
@@ -33,6 +34,7 @@ fn main() {
             }),
             ..default()
         }))
+        .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup)
         .add_systems(Update, mouse_pos)
         .run();
@@ -42,7 +44,10 @@ fn setup(
     mut commands: Commands,
     mut tiles: ResMut<TileMap>,
 ) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default()); 
+
+    spawn_node(&mut commands, "Open", JustifyContent::Center);
+    spawn_node(&mut commands, "Block", JustifyContent::Start);
 
     for row in 0..ROWS {
         for col in 0..COLS {
@@ -51,7 +56,6 @@ fn setup(
                 ROW_OFFSET + row as f32 * SIZE - TOP / 2 as f32,
                 0.,
             );
-
             tiles[(row, col)] = Some(
                 commands.spawn((
                     SpriteBundle {
@@ -68,6 +72,44 @@ fn setup(
             );
         }
     }
+}
+
+fn spawn_node(commands: &mut Commands, text: &str, justify_content: JustifyContent) {
+    commands.spawn(NodeBundle {
+       style: Style {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            justify_content,
+            align_items: AlignItems::Start,
+            ..default()
+        },
+        ..default()
+    })
+    .with_children(|parent| {
+        parent.spawn(ButtonBundle {
+            style: Style {
+                width: Val::Px(150.),
+                height: Val::Px(65.),
+                border: UiRect::all(Val::Px(5.)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            border_color: BorderColor(Color::BLACK),
+            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn(TextBundle::from_section(
+                text,
+                TextStyle {
+                    font_size: 24.0,
+                    color: Color::rgb(0., 0., 0.),
+                    ..default()
+                },
+            ));
+        });
+    });
 }
 
 fn mouse_pos(
