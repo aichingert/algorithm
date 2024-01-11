@@ -33,7 +33,7 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
-    mut tile_map: ResMut<TileMap>,
+    mut tiles: ResMut<TileMap>,
 ) {
     commands.spawn(Camera2dBundle::default());
 
@@ -45,7 +45,7 @@ fn setup(
                 0.,
             );
 
-            tile_map.entities[row][col] = Some(
+            tiles[(row, col)] = Some(
                 commands.spawn((
                     SpriteBundle {
                         sprite: Sprite {
@@ -57,21 +57,29 @@ fn setup(
                         ..default()
                     },
                     Tile::new((row, col), TileState::Open),
-                )).id());
+                )).id()
+            );
         }
     }
 }
 
 fn mouse_pos(
     windows: Query<&Window, With<PrimaryWindow>>,
+    tiles: Res<TileMap>,
     buttons: Res<Input<MouseButton>>,
-    //t_query: Query<&mut Tile, &mut Sprite>,
+    mut t_query: Query<(&mut Tile, &mut Sprite)>,
 ) {
     if !buttons.pressed(MouseButton::Left) {
         return;
     }
 
     if let Some(Vec2 { x, y }) = windows.single().cursor_position() {
-        println!("{} = {}", (x / SIZE).floor(), (y / SIZE).floor());
+        let (x, y) = ((x/SIZE).floor() as usize,TILES - 1 - (y/SIZE).floor() as usize);
+
+        if let Ok((_, mut sprite)) = t_query.get_mut(tiles[(y, x)].unwrap()) {
+            sprite.color = Color::rgb(0., 0., 0.);
+            //println!("{:?}", tile.position);
+        }
+
     }
 }
