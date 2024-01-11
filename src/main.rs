@@ -6,14 +6,21 @@ use bevy::{
 mod tile;
 use tile::{Tile, TileState, TileMap};
 
-const TILES: usize= (HEIGHT / SIZE) as usize;
+const ROWS: usize = ((HEIGHT - TOP) / SIZE) as usize;
+const COLS: usize = (WIDTH / SIZE) as usize;
 
-const OFFSET: f32 = (-(TILES as f32 / 2. * SIZE)) + SIZE / 2.;
+const TILES: usize = ROWS * COLS;
+
+const ROW_OFFSET: f32 = (-(ROWS as f32 / 2. * SIZE)) + SIZE / 2.;
+const COL_OFFSET: f32 = (-(COLS as f32 / 2. * SIZE)) + SIZE / 2.;
+
 const MARGIN: f32 = 15.0;
 const SIZE: f32 = 50.0;
 
-const WIDTH: f32 = 400.;
-const HEIGHT: f32 = 400.;
+const TOP: f32 = 100.;
+
+const WIDTH: f32 = 800.;
+const HEIGHT: f32 = 800.;
 
 fn main() {
     App::new()
@@ -37,11 +44,11 @@ fn setup(
 ) {
     commands.spawn(Camera2dBundle::default());
 
-    for row in 0..TILES {
-        for col in 0..TILES {
+    for row in 0..ROWS {
+        for col in 0..COLS {
             let position = Vec3::new(
-                OFFSET + col as f32 * SIZE,
-                OFFSET + row as f32 * SIZE,
+                COL_OFFSET + col as f32 * SIZE,
+                ROW_OFFSET + row as f32 * SIZE - TOP / 2 as f32,
                 0.,
             );
 
@@ -74,12 +81,10 @@ fn mouse_pos(
     }
 
     if let Some(Vec2 { x, y }) = windows.single().cursor_position() {
-        let (x, y) = ((x/SIZE).floor() as usize,TILES - 1 - (y/SIZE).floor() as usize);
+        let (x, y) = ((x/SIZE).floor() as usize,ROWS - 1 - ((y - TOP) /SIZE).floor() as usize);
 
         if let Ok((_, mut sprite)) = t_query.get_mut(tiles[(y, x)].unwrap()) {
             sprite.color = Color::rgb(0., 0., 0.);
-            //println!("{:?}", tile.position);
         }
-
     }
 }
