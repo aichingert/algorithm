@@ -1,22 +1,19 @@
 use bevy::prelude::*;
-use std::ops::{Index, IndexMut};
+
+type Entities = [[Option<Entity>; super::TILES]; super::TILES];
 
 #[derive(Resource)]
 pub struct TileMap {
-    pub entities: [[Option<Entity>; super::TILES]; super::TILES],
+    pub entities: Entities,
 }
 
-impl Index<(usize, usize)> for TileMap {
-    type Output = Option<Entity>;
-
-    fn index(&self, idx: (usize, usize)) -> &Self::Output {
-        &self.entities[idx.0][idx.1]
+impl TileMap {
+    pub fn get_mut_entities(&mut self) -> &mut Entities {
+        &mut self.entities
     }
-}
 
-impl IndexMut<(usize, usize)> for TileMap {
-    fn index_mut(&mut self, idx: (usize, usize)) -> &mut Self::Output {
-        &mut self.entities[idx.0][idx.1]
+    pub fn get_entity(&self, row: usize, col: usize) -> Entity {
+        self.entities[row][col].unwrap()
     }
 }
 

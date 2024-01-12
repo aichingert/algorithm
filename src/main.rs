@@ -3,6 +3,9 @@ use bevy::{
     window::PrimaryWindow,
 };
 
+mod button;
+use button::Buttons;
+
 mod tile;
 use tile::{Tile, TileState, TileMap, State};
 
@@ -29,6 +32,7 @@ const HEIGHT: f32 = 800.;
 fn main() {
     App::new()
         .insert_resource(State(TileState::Start))
+        .insert_resource(Buttons::new())
         .insert_resource(TileMap { entities: [[None; TILES]; TILES] })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -40,20 +44,19 @@ fn main() {
         }))
         .add_systems(Startup, setup)
         .add_systems(Update, mouse_pos)
-        .add_systems(Update, button_system)
+        .add_systems(Update, Buttons::system)
         .run();
 }
 
 fn setup(
     mut commands: Commands,
     mut tiles: ResMut<TileMap>,
+    mut buttons: ResMut<Buttons>,
 ) {
     commands.spawn(Camera2dBundle::default()); 
+    buttons.spawn(&mut commands);
 
-    spawn_node(&mut commands, "Start", Val::Px(BTN_SIZE - BTN_MARGIN), Val::Px(TOP_OFFSET));
-    spawn_node(&mut commands, "End",   Val::Px(BTN_SIZE *2. - BTN_MARGIN /3.), Val::Px(TOP_OFFSET));
-    spawn_node(&mut commands, "Block", Val::Px(BTN_SIZE *3. + BTN_MARGIN /3.), Val::Px(TOP_OFFSET));
-    spawn_node(&mut commands, "Open", Val::Px(BTN_SIZE *4. + BTN_MARGIN), Val::Px(TOP_OFFSET));
+    let entities = tiles.get_mut_entities();
 
     for row in 0..ROWS {
         for col in 0..COLS {
@@ -63,7 +66,7 @@ fn setup(
                 0.,
             );
 
-            tiles[(row, col)] = Some(
+            entities[row][col] = Some(
                 commands.spawn((
                     SpriteBundle {
                         sprite: Sprite {
@@ -79,79 +82,6 @@ fn setup(
             );
         }
     }
-}
-
-fn button_system(
-    mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ),
-        (Changed<Interaction>, With<Button>),
-    >,
-    txt_query: Query<&Text>,
-    mut state: ResMut<State>,
-
-) {
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let txt = &txt_query.get(children[0]).unwrap().sections[0].value;
-
-        match *interaction {
-            Interaction::Pressed => {
-                border_color.0 = Color::RED;
-                state.set(txt);
-            }
-            Interaction::Hovered => {
-                border_color.0 = Color::WHITE;
-            }
-            Interaction::None => {
-                println!("{txt}");
-                border_color.0 = if state.is_same(txt) {
-                    Color::WHITE
-                } else {
-                    Color::GRAY
-                };
-            }
-        }
-    }
-}
-
-fn spawn_node(commands: &mut Commands, text: &str, left: Val, top: Val) {
-    commands.spawn(NodeBundle {
-       style: Style {
-           left,
-           top,
-            ..default()
-        },
-        ..default()
-    })
-    .with_children(|parent| {
-        parent.spawn(ButtonBundle {
-            style: Style {
-                width: Val::Px(BTN_SIZE),
-                height: Val::Px(60.),
-                border: UiRect::all(Val::Px(5.)),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            border_color: Color::GRAY.into(),
-            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
-            ..default()
-        })
-        .with_children(|builder| {
-            builder.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font_size: 24.0,
-                    color: Color::WHITE,
-                    ..default()
-                },
-            ));
-        });
-    });
 }
 
 fn mouse_pos(
@@ -170,7 +100,7 @@ fn mouse_pos(
 
         let (x, y) = ((x/SIZE).floor() as usize,ROWS - 1 - ((y - TOP) /SIZE).floor() as usize);
 
-        if let Ok((_, mut sprite)) = t_query.get_mut(tiles[(y, x)].unwrap()) {
+        if let Ok((_, mut sprite)) = t_query.get_mut(tiles.get_entity(y, x)) {
             sprite.color = state.get_color();
         }
     }
