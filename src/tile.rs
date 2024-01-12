@@ -27,6 +27,39 @@ pub enum TileState {
     End,
 }
 
+#[derive(Resource)]
+pub struct State(pub TileState);
+
+impl State {
+    pub fn is_same(&self, txt: &str) -> bool {
+        match self.0 {
+            TileState::Start => txt == "Start",
+            TileState::Block => txt == "Block",
+            TileState::Open  => txt == "Open",
+            TileState::End   => txt == "End",
+        }
+    }
+
+    pub fn set(&mut self, txt: &str) {
+        self.0 = match txt {
+            "Start" => TileState::Start,
+            "Block" => TileState::Block,
+            "Open" => TileState::Open,
+            "End" => TileState::End,
+            _ => unreachable!(),
+        };
+    }
+
+    pub fn get_color(&self) -> Color {
+        match self.0 {
+            TileState::Start => Color::GREEN,
+            TileState::Block => Color::BLACK,
+            TileState::Open  => Color::WHITE,
+            TileState::End   => Color::RED,
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Tile {
     pub state: TileState,
