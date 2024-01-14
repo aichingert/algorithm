@@ -7,7 +7,7 @@ and look at their visualization
 
 You can have multiple starts if you want (Currently you can also have multiple endpoints but that is not intended)
 
-<img src="docs/demo.png" />
+<img src="demo.png" />
 
 ## TODOS
 
