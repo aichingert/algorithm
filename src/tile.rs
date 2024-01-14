@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-type Entities = [[Option<Entity>; super::TILES]; super::TILES];
+type Entities = [[Option<Entity>; super::COLS]; super::ROWS];
 
 #[derive(Resource)]
 pub struct TileMap {
@@ -17,7 +17,10 @@ impl TileMap {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub enum TileState {
+    Visited,
+    Solve,
     Start,
     Block,
     Open,
@@ -28,17 +31,25 @@ pub enum TileState {
 pub struct State(pub TileState);
 
 impl State {
+    pub fn is_drawable(&self) -> bool {
+        self.0 != TileState::Solve
+    }
+
     pub fn is_same(&self, txt: &str) -> bool {
-        match self.0 {
-            TileState::Start => txt == "Start",
-            TileState::Block => txt == "Block",
-            TileState::Open  => txt == "Open",
-            TileState::End   => txt == "End",
+        txt == match self.0 {
+            TileState::Visited => "Visited",
+            TileState::Start => "Start",
+            TileState::Block => "Block",
+            TileState::Solve => "Solve",
+            TileState::Open  => "Open",
+            TileState::End   => "End",
         }
     }
 
     pub fn set(&mut self, txt: &str) {
         self.0 = match txt {
+            "Visited" => TileState::Visited,
+            "Solve" => TileState::Solve,
             "Start" => TileState::Start,
             "Block" => TileState::Block,
             "Open" => TileState::Open,
@@ -49,10 +60,12 @@ impl State {
 
     pub fn get_color(&self) -> Color {
         match self.0 {
+            TileState::Visited => Color::YELLOW,
             TileState::Start => Color::GREEN,
             TileState::Block => Color::BLACK,
             TileState::Open  => Color::WHITE,
             TileState::End   => Color::RED,
+            _ => unreachable!(),
         }
     }
 }

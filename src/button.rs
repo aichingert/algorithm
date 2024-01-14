@@ -1,28 +1,23 @@
 use bevy::prelude::*;
 
-use crate::tile::State;
+use std::collections::VecDeque;
 
-#[derive(Resource)]
-pub struct Buttons {
-    buttons: [Option<Entity>; 4],
-}
+use crate::tile::{Tile, TileMap, TileState, State};
+use crate::Bfs;
+
+pub struct Buttons;
 
 impl Buttons {
-    pub fn new() -> Self {
-        Self { buttons: [None; 4] }
-    }
-
     pub fn system(
         mut interaction_query: Query<
-            (
-                &Interaction,
-                &mut BorderColor,
-                &Children,
-            ),
+            (&Interaction,&mut BorderColor, &Children),
             (Changed<Interaction>, With<Button>),
         >,
         txt_query: Query<&Text>,
+        t_query: Query<&Tile>,
+        tiles: Res<TileMap>,
         mut state: ResMut<State>,
+        mut bfs: ResMut<Bfs>,
     ) {
         for (interaction, mut border_color, children) in &mut interaction_query {
             let txt = &txt_query.get(children[0]).unwrap().sections[0].value;
@@ -30,6 +25,32 @@ impl Buttons {
             match *interaction {
                 Interaction::Pressed => {
                     border_color.0 = Color::RED;
+
+                    if txt == "Solve" {
+                        let mut start = VecDeque::new();
+                        let mut end = (0, 0);
+
+                        for i in 0..super::ROWS {
+                            for j in 0..super::COLS {
+                                let tile = t_query.get(tiles.get_entity(i, j)).unwrap();
+
+                                match tile.state {
+                                    TileState::Start => {
+                                        start.push_back((i, j));
+                                    }
+                                    TileState::End => {
+                                        end = (i, j);
+                                    }
+                                    _ => (),
+                                }
+                            }
+                        }
+
+                        bfs.queue = start.clone();
+                        bfs.start = start;
+                        bfs.goal = end;
+                    }
+
                     state.set(txt);
                 }
                 Interaction::Hovered => {
@@ -46,28 +67,27 @@ impl Buttons {
         }
     }
 
-    pub fn spawn(&mut self, commands: &mut Commands) {
+    pub fn spawn(commands: &mut Commands) {
         let btns = [
             (super::BTN_SIZE * 1. - super::BTN_MARGIN,      "Start"), 
-            (super::BTN_SIZE * 2. - super::BTN_MARGIN / 3., "End"), 
-            (super::BTN_SIZE * 3. + super::BTN_MARGIN / 3., "Block"),
-            (super::BTN_SIZE * 4. + super::BTN_MARGIN,      "Open"),
+            (super::BTN_SIZE * 2. - super::BTN_MARGIN / 4., "End"), 
+            (super::BTN_SIZE * 3. + super::BTN_MARGIN / 4., "Block"),
+            (super::BTN_SIZE * 4. + super::BTN_MARGIN / 2., "Open"),
+            (super::BTN_SIZE * 5. + super::BTN_MARGIN,      "Solve"),
         ];
 
-        for (i, (left, txt)) in btns.into_iter().enumerate() {
-            self.buttons[i] = self.create_button(commands, Val::Px(left), txt);
+        for (left, txt) in btns {
+            Buttons::create_button(commands, Val::Px(left), txt);
         }
     }
 
-    fn create_button(&self, commands: &mut Commands, left: Val, txt: &str) -> Option<Entity> {
-        let mut entity = None;
-
+    fn create_button(commands: &mut Commands, left: Val, txt: &str) {
         commands.spawn(NodeBundle {
             style: Style { left, top: Val::Px(super::TOP_OFFSET), ..default() },
             ..default()
         })
         .with_children(|parent| {
-            let mut button = parent.spawn(ButtonBundle {
+            parent.spawn(ButtonBundle {
                 style: Style {
                     width: Val::Px(super::BTN_SIZE),
                     height: Val::Px(super::TOP - 2. * super::TOP_OFFSET),
@@ -79,9 +99,8 @@ impl Buttons {
                 border_color: Color::GRAY.into(),
                 background_color: Color::rgb(0.15, 0.15, 0.15).into(),
                 ..default()
-            });
-
-            button.with_children(|builder| {
+            })
+            .with_children(|builder| {
                 builder.spawn(TextBundle::from_section(
                     txt,
                     TextStyle {
@@ -91,10 +110,6 @@ impl Buttons {
                     },
                 ));
             });
-
-            entity = Some(button.id());
         });
-
-        entity
     }
 }
