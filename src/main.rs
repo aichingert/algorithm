@@ -45,7 +45,7 @@ fn main() {
         }))
         .add_systems(Startup, setup)
         .add_systems(Update, (draw, Buttons::system))
-        .add_systems(Update, solve.run_if(on_timer(Duration::from_millis(100))))
+        .add_systems(Update, solve/*.run_if(on_timer(Duration::from_millis(100))*/)
         .run();
 }
 
@@ -57,6 +57,7 @@ struct Bfs {
     seen: HashSet<(usize, usize)>,
     pub goal: (usize, usize),
     pub start: VecDeque<(usize, usize)>,
+    pub blocked: HashSet<(i32, i32)>,
     is_finished: bool,
 }
 
@@ -67,6 +68,7 @@ impl Bfs {
             seen: HashSet::new(), 
             start: VecDeque::new(),
             goal: (0, 0), 
+            blocked: HashSet::new(),
             is_finished: false 
         }
     }
@@ -91,7 +93,7 @@ impl Bfs {
             for (dy, dx) in [(0,1),(1,0),(0,-1),(-1,0)] {
                 let (ny, nx) = (y as i32 + dy, x as i32 + dx);
 
-                if ny < 0 || nx < 0 || ny >= ROWS as i32 || nx >= COLS as i32 {
+                if ny < 0 || nx < 0 || ny >= ROWS as i32 || nx >= COLS as i32 || self.blocked.contains(&(ny, nx)) {
                     continue;
                 }
 
@@ -134,15 +136,15 @@ fn setup(
 
     let entities = tiles.get_mut_entities();
 
-    for row in 0..ROWS {
-        for col in 0..COLS {
+    for (row, rows) in entities.iter_mut().enumerate().take(ROWS) {
+        for (col, entity) in rows.iter_mut().enumerate().take(COLS) {
             let position = Vec3::new(
                 COL_OFFSET + col as f32 * SIZE,
-                ROW_OFFSET + row as f32 * SIZE - TOP / 2 as f32,
+                ROW_OFFSET + row as f32 * SIZE - TOP / 2.,
                 0.,
             );
 
-            entities[row][col] = Some(
+            *entity = Some(
                 commands.spawn((
                     SpriteBundle {
                         sprite: Sprite {
