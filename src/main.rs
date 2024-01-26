@@ -49,14 +49,14 @@ fn main() {
         .run();
 }
 
-use std::collections::{VecDeque, HashSet};
+use std::collections::HashSet;
 
 #[derive(Resource, Debug)]
 struct Bfs {
-    pub queue: VecDeque<(usize, usize)>,
+    pub queue: Vec<(usize, usize)>,
     seen: HashSet<(usize, usize)>,
     pub goal: (usize, usize),
-    pub start: VecDeque<(usize, usize)>,
+    pub start: Vec<(usize, usize)>,
     pub blocked: HashSet<(i32, i32)>,
     is_finished: bool,
 }
@@ -64,20 +64,31 @@ struct Bfs {
 impl Bfs {
     fn new() -> Self {
         Self { 
-            queue: VecDeque::new(), 
+            queue: Vec::new(), 
             seen: HashSet::new(), 
-            start: VecDeque::new(),
+            start: Vec::new(),
             goal: (0, 0), 
             blocked: HashSet::new(),
             is_finished: false 
         }
     }
 
+    fn dis(&self, coord: &(usize, usize)) -> i32 {
+        (self.goal.0 as i32 - coord.0 as i32).abs() + (self.goal.1 as i32 - coord.1 as i32).abs()
+    }
+
     fn step(&mut self) -> Option<(usize, usize)> {
         let mut current = None;
 
+        {
+            let mut queue = self.queue.clone();
+            queue.sort_by(|a, b| self.dis(b).cmp(&self.dis(a)));
+            self.queue = queue;
+        }
+
+
         while current.is_none() && !self.queue.is_empty() {
-            let next = self.queue.pop_front().unwrap();
+            let next = self.queue.pop().unwrap();
 
             if self.seen.insert(next) {
                 current = Some(next);
@@ -97,7 +108,7 @@ impl Bfs {
                     continue;
                 }
 
-                self.queue.push_back((ny as usize, nx as usize));
+                self.queue.push((ny as usize, nx as usize));
             }
         } else {
             self.is_finished = true;

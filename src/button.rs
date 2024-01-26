@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use std::collections::{VecDeque, HashSet};
+use std::collections::HashSet;
 
 use crate::tile::{Tile, TileMap, TileState, State};
 use crate::Bfs;
@@ -28,7 +28,7 @@ impl Buttons {
 
                     if txt == "Solve" {
                         let mut blocked = HashSet::new();
-                        let mut start = VecDeque::new();
+                        let mut start = Vec::new();
                         let mut end = (0, 0);
 
                         for i in 0..super::ROWS {
@@ -36,7 +36,7 @@ impl Buttons {
                                 let tile = t_query.get(tiles.get_entity(i, j)).unwrap();
 
                                 match tile.state {
-                                    TileState::Start => { start.push_back((i, j)); }
+                                    TileState::Start => { start.push((i, j)); }
                                     TileState::End => { end = (i, j); }
                                     TileState::Block => { blocked.insert((i as i32, j as i32)); }
                                     _ => (),
