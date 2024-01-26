@@ -1,10 +1,9 @@
 use bevy::{
     prelude::*,
     window::PrimaryWindow,
-    time::common_conditions::on_timer,
 };
 
-use std::time::Duration;
+use std::collections::HashSet;
 
 mod button;
 use button::Buttons;
@@ -49,16 +48,15 @@ fn main() {
         .run();
 }
 
-use std::collections::HashSet;
 
 #[derive(Resource, Debug)]
 struct Bfs {
     pub queue: Vec<(usize, usize)>,
-    seen: HashSet<(usize, usize)>,
     pub goal: (usize, usize),
     pub start: Vec<(usize, usize)>,
     pub blocked: HashSet<(i32, i32)>,
     is_finished: bool,
+    seen: HashSet<(usize, usize)>,
 }
 
 impl Bfs {
@@ -85,7 +83,6 @@ impl Bfs {
             queue.sort_by(|a, b| self.dis(b).cmp(&self.dis(a)));
             self.queue = queue;
         }
-
 
         while current.is_none() && !self.queue.is_empty() {
             let next = self.queue.pop().unwrap();
