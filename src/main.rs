@@ -50,7 +50,7 @@ fn main() {
 
 
 #[derive(Resource, Debug)]
-struct Bfs {
+pub struct Bfs {
     pub queue: Vec<(usize, usize)>,
     pub goal: (usize, usize),
     pub start: Vec<(usize, usize)>,
