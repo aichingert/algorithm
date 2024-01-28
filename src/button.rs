@@ -40,18 +40,17 @@ impl Buttons {
                             let tile = t_query.get(tiles.get_entity(i, j)).unwrap();
 
                             match tile.state {
-                                TileState::Start => src = Some(Coord::new(i, j)),
-                                TileState::End   => dst = Some(Coord::new(i, j)),
-                                TileState::Block => { blocked.insert(Coord::new(i, j)); }
+                                TileState::Start => src = Some(Coord::new(j, i)),
+                                TileState::End   => dst = Some(Coord::new(j, i)),
+                                TileState::Block => { blocked.insert(Coord::new(j, i)); }
                                 _ => (),
                             }
                         }
                     }
 
-                    let (src, dst) = (src.expect("a start node"), dst.expect("a end node"));
-
-                    blocked.insert(src);
-                    blocked.insert(dst);
+                    let (mut src, mut dst) = (src.expect("a start node"), dst.expect("a end node"));
+                    src.dst = (dst.x, dst.y);
+                    dst.dst = (dst.x, dst.y);
 
                     bfs.set_src(src);
                     bfs.set_dst(dst);

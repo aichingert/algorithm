@@ -61,8 +61,12 @@ fn solve(
         return;
     }
 
-    if let Some(Coord { x, y, .. }) = bfs.step() {
-        let (_, mut sprite) = t_query.get_mut(tiles.get_entity(y, x)).unwrap();
+    if let Some(coord) = bfs.step() {
+        if !bfs.is_valid(coord) {
+            return
+        }
+
+        let (_, mut sprite) = t_query.get_mut(tiles.get_entity(coord.y, coord.x)).unwrap();
         sprite.color = Color::YELLOW;
     }
 }
