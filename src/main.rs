@@ -11,6 +11,9 @@ use button::Buttons;
 mod tile;
 use tile::{Tile, TileState, TileMap, State};
 
+mod algorithm;
+use algorithm::{Bfs, Coord};
+
 const ROWS: usize = ((HEIGHT - TOP) / SIZE) as usize;
 const COLS: usize = (WIDTH / SIZE) as usize;
 
@@ -48,88 +51,17 @@ fn main() {
         .run();
 }
 
-
-#[derive(Resource, Debug)]
-pub struct Bfs {
-    pub queue: Vec<(usize, usize)>,
-    pub goal: (usize, usize),
-    pub start: Vec<(usize, usize)>,
-    pub blocked: HashSet<(i32, i32)>,
-    is_finished: bool,
-    seen: HashSet<(usize, usize)>,
-}
-
-impl Bfs {
-    fn new() -> Self {
-        Self { 
-            queue: Vec::new(), 
-            seen: HashSet::new(), 
-            start: Vec::new(),
-            goal: (0, 0), 
-            blocked: HashSet::new(),
-            is_finished: false 
-        }
-    }
-
-    fn dis(&self, coord: &(usize, usize)) -> i32 {
-        (self.goal.0 as i32 - coord.0 as i32).abs() + (self.goal.1 as i32 - coord.1 as i32).abs()
-    }
-
-    fn step(&mut self) -> Option<(usize, usize)> {
-        let mut current = None;
-
-        {
-            let mut queue = self.queue.clone();
-            queue.sort_by(|a, b| self.dis(b).cmp(&self.dis(a)));
-            self.queue = queue;
-        }
-
-        while current.is_none() && !self.queue.is_empty() {
-            let next = self.queue.pop().unwrap();
-
-            if self.seen.insert(next) {
-                current = Some(next);
-            }
-        }
-
-        if let Some((y, x)) = current {
-            if self.goal == (y, x) {
-                self.is_finished = true;
-                return None;
-            }
-
-            for (dy, dx) in [(0,1),(1,0),(0,-1),(-1,0)] {
-                let (ny, nx) = (y as i32 + dy, x as i32 + dx);
-
-                if ny < 0 || nx < 0 || ny >= ROWS as i32 || nx >= COLS as i32 || self.blocked.contains(&(ny, nx)) {
-                    continue;
-                }
-
-                self.queue.push((ny as usize, nx as usize));
-            }
-        } else {
-            self.is_finished = true;
-        }
-
-        current
-    }
-}
-
 fn solve(
     state: Res<State>,
     mut bfs: ResMut<Bfs>,
     tiles: ResMut<TileMap>,
     mut t_query: Query<(&mut Tile, &mut Sprite)>,
 ) {
-    if state.is_drawable() || bfs.is_finished {
+    if state.is_drawable() {
         return;
     }
 
-    if let Some((y, x)) = bfs.step() {
-        if bfs.start.contains(&(y, x)) {
-            return;
-        }
-
+    if let Some(Coord { x, y, .. }) = bfs.step() {
         let (_, mut sprite) = t_query.get_mut(tiles.get_entity(y, x)).unwrap();
         sprite.color = Color::YELLOW;
     }

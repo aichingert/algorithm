@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use std::collections::HashSet;
+use std::collections::{BinaryHeap, HashSet};
 
 use crate::tile::{Tile, TileMap, TileState, State};
-use crate::Bfs;
+use crate::algorithm::{Bfs, Coord};
 
 pub struct Buttons;
 
@@ -25,32 +25,37 @@ impl Buttons {
             match *interaction {
                 Interaction::Pressed => {
                     border_color.0 = Color::RED;
+                    state.set(txt);
 
-                    if txt == "Solve" {
-                        let mut blocked = HashSet::new();
-                        let mut start = Vec::new();
-                        let mut end = (0, 0);
-
-                        for i in 0..super::ROWS {
-                            for j in 0..super::COLS {
-                                let tile = t_query.get(tiles.get_entity(i, j)).unwrap();
-
-                                match tile.state {
-                                    TileState::Start => { start.push((i, j)); }
-                                    TileState::End => { end = (i, j); }
-                                    TileState::Block => { blocked.insert((i as i32, j as i32)); }
-                                    _ => (),
-                                }
-                            }
-                        }
-
-                        bfs.queue = start.clone();
-                        bfs.start = start;
-                        bfs.goal = end;
-                        bfs.blocked = blocked;
+                    if txt != "Solve" {
+                        break;
                     }
 
-                    state.set(txt);
+                    let mut blocked = HashSet::new();
+                    let mut src: Option<Coord> = None;
+                    let mut dst: Option<Coord> = None;
+
+                    for i in 0..super::ROWS {
+                        for j in 0..super::COLS {
+                            let tile = t_query.get(tiles.get_entity(i, j)).unwrap();
+
+                            match tile.state {
+                                TileState::Start => src = Some(Coord::new(i, j)),
+                                TileState::End   => dst = Some(Coord::new(i, j)),
+                                TileState::Block => { blocked.insert(Coord::new(i, j)); }
+                                _ => (),
+                            }
+                        }
+                    }
+
+                    let (src, dst) = (src.expect("a start node"), dst.expect("a end node"));
+
+                    blocked.insert(src);
+                    blocked.insert(dst);
+
+                    bfs.set_src(src);
+                    bfs.set_dst(dst);
+                    bfs.set_visited(blocked);
                 }
                 Interaction::Hovered => {
                     border_color.0 = Color::WHITE;
