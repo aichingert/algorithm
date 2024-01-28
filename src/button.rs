@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::HashSet;
 
 use crate::tile::{Tile, TileMap, TileState, State};
 use crate::algorithm::{Bfs, Coord};
@@ -31,7 +31,7 @@ impl Buttons {
                         break;
                     }
 
-                    let mut blocked = HashSet::new();
+                    let mut blocked = Vec::new();
                     let mut src: Option<Coord> = None;
                     let mut dst: Option<Coord> = None;
 
@@ -42,7 +42,7 @@ impl Buttons {
                             match tile.state {
                                 TileState::Start => src = Some(Coord::new(j, i)),
                                 TileState::End   => dst = Some(Coord::new(j, i)),
-                                TileState::Block => { blocked.insert(Coord::new(j, i)); }
+                                TileState::Block => { blocked.push(Coord::new(j, i)); }
                                 _ => (),
                             }
                         }
@@ -52,9 +52,16 @@ impl Buttons {
                     src.dst = (dst.x, dst.y);
                     dst.dst = (dst.x, dst.y);
 
+                    let mut visited = HashSet::new();
+
+                    for mut coord in blocked.into_iter() {
+                        coord.dst = (dst.x, dst.y);
+                        visited.insert(coord);
+                    }
+
                     bfs.set_src(src);
                     bfs.set_dst(dst);
-                    bfs.set_visited(blocked);
+                    bfs.set_visited(visited);
                 }
                 Interaction::Hovered => {
                     border_color.0 = Color::WHITE;

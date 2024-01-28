@@ -83,7 +83,7 @@ impl Bfs {
     }
 
     pub fn step(&mut self) -> Option<Coord> {
-        let mut next = self.get_next_valid_coord();
+        let next = self.get_next_valid_coord();
 
         if let Some(coord) = next {
             if self.dst == coord {

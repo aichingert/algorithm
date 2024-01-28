@@ -3,8 +3,6 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-use std::collections::HashSet;
-
 mod button;
 use button::Buttons;
 
@@ -12,7 +10,7 @@ mod tile;
 use tile::{Tile, TileState, TileMap, State};
 
 mod algorithm;
-use algorithm::{Bfs, Coord};
+use algorithm::Bfs;
 
 const ROWS: usize = ((HEIGHT - TOP) / SIZE) as usize;
 const COLS: usize = (WIDTH / SIZE) as usize;
